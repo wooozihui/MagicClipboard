@@ -48,7 +48,7 @@
 
 ## 下载
 
-可通过 链接[https://github.com/wooozihui/MagicClipboard/releases/tag/v0.1] 下载windows app
+也可以通过 链接[https://github.com/wooozihui/MagicClipboard/releases/tag/v0.1] 下载windows app运行使用
 
 ## 使用说明
 
