@@ -25,8 +25,8 @@
 1. **克隆仓库：**
 
    ```bash
-   git clone https://github.com/your-username/clipboard-processor.git
-   cd clipboard-processor
+   git clone https://github.com/wooozihui/MagicClipboard
+   cd MagicClipboard
    ```
 
 2. **安装所需的依赖包：**
