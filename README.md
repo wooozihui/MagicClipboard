@@ -6,7 +6,7 @@
 
 ## 动机
 
-**1.来自PowerToy keyboard的启发**: 下图为PowerToy keyboard程序，它支持使用GPT对剪贴板文本进行处理，但每次都需要用户在使用的时候手动输入prompt进行格式描述，很不方便；
+**1.来自PowerToy keyboard的启发**: 下图为PowerToy keyboard程序，它支持使用GPT对剪贴板文本进行处理，但每次都需要用户在使用的时候手动输入prompt进行格式描述，很不方便；MagicClipboard通过允许用户预定义操作来解决这一问题;
 
 ![2f3cfe558c38062a33265f29962f75c](https://github.com/user-attachments/assets/1e47dad0-7372-41e4-9d1f-0a52fde31062)
 
