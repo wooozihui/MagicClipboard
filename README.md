@@ -1,95 +1,96 @@
-# 魔法剪贴板
+```markdown
+# Magic Clipboard
 
-**魔法剪贴板** 是一个基于 PyQt5 的windows桌面小程序，它可以自动监控剪贴板内容，并允许用户使用自定义的功能通过 OpenAI 的 API 来处理这些内容。
+**Magic Clipboard** is a Windows desktop application based on PyQt5 that automatically monitors clipboard content and allows users to process this content using custom functions through OpenAI's API. For the Chinese version of this document, please see [README-cn.md](./README-cn.md).
 
-![6e69db66-438e-47d5-a6c4-3400fa935c99](https://github.com/user-attachments/assets/1ec11d19-eb97-4e7b-902b-fb74e3775e13)
-
-## 动机
-
-**1.来自PowerToy keyboard的启发**: 下图为PowerToy keyboard程序，它支持使用GPT对剪贴板文本进行处理，但每次都需要用户在使用的时候手动输入prompt进行格式描述，很不方便；MagicClipboard通过允许用户预定义操作来解决这一问题;
-
-![2f3cfe558c38062a33265f29962f75c](https://github.com/user-attachments/assets/1e47dad0-7372-41e4-9d1f-0a52fde31062)
+![6e69db66-438e-47d5-a6c4-3400fa935c99](https://github.com/user-attachments/assets/df629811-6b39-46b7-b9c7-ba7b2d37a72f)
 
 
-**2.为什么使用剪贴板进行交互：** 对于需要频繁使用的操作而言，比如翻译，使用剪贴板交互更加方便快捷:
+## Motivation
 
-- 原操作流：用户希望翻译一段句子 -> 用户复制句子 -> 用户粘贴到AI聊天软件 -> 用户输入翻译prompt -> 得到结果
-- 剪贴板交互: 用户希望翻译一段句子 -> 用户复制句子 -> 点击预设功能(ex:英译中) -> 得到结果
+**1. Inspired by PowerToy keyboard**: The image below shows the PowerToy keyboard program, which supports processing clipboard text using GPT, but it requires the user to manually input the prompt for formatting every time. This can be inconvenient. MagicClipboard solves this problem by allowing users to predefine operations.
 
-## 功能特性
+![image](https://github.com/user-attachments/assets/f6d52d00-fb74-41b3-b9f3-6913b1ab5e13)
 
-- **剪贴板监控**：自动刷新并显示剪贴板中的内容。
-- **自定义功能**：用户可以添加自定义功能，通过特定的提示词来处理剪贴板内容。
-- **模型选择**：用户可以配置和选择不同的模型(兼容OPENAI接口即可)进行处理。
-- **配置管理**：用户可以配置并保存 API 密钥、基础 URL 和模型名称，以便于快速访问。
 
-## 安装
+**2. Why use clipboard interaction:** For frequently used operations, such as translation, using clipboard interaction is more convenient and faster:
 
-### 先决条件
+- Original workflow: The user wants to translate a sentence -> The user copies the sentence -> The user pastes it into an AI chat application -> The user inputs a translation prompt -> The result is obtained
+- Clipboard interaction: The user wants to translate a sentence -> The user copies the sentence -> Clicks on the preset function (e.g., English to Chinese) -> The result is obtained
+
+## Features
+
+- **Clipboard Monitoring**: Automatically refreshes and displays the content of the clipboard.
+- **Custom Functions**: Users can add custom functions to process clipboard content using specific prompts.
+- **Model Selection**: Users can configure and select different models (as long as they are compatible with the OpenAI interface) for processing.
+- **Configuration Management**: Users can configure and save API keys, base URLs, and model names for quick access.
+
+## Installation
+
+### Prerequisites
 
 - Python 3.x
 - PyQt5
 - pyperclip
 - openai
 
-### 步骤
+### Steps
 
-1. **克隆仓库：**
+1. **Clone the repository:**
 
    ```bash
    git clone https://github.com/wooozihui/MagicClipboard
    cd MagicClipboard
    ```
 
-2. **安装所需的依赖包：**
+2. **Install the required dependencies:**
 
-   你可以使用 `pip` 来安装所需的依赖包：
+   You can use `pip` to install the required dependencies:
 
    ```bash
    pip install -r requirements.txt
    ```
 
-3. **运行应用程序：**
+3. **Run the application:**
 
-   执行主脚本：
+   Execute the main script:
 
    ```bash
    python main.py
    ```
 
-## 下载
+## Download
 
-也可以通过 链接[https://github.com/wooozihui/MagicClipboard/releases/tag/v0.1] 下载windows app运行使用
+You can also download the Windows app and run it using the link [https://github.com/wooozihui/MagicClipboard/releases/tag/v0.1].
 
-## 使用说明
+## Instructions
 
-- **添加新功能：**
-  - 点击“Add New Function”来创建一个带有自定义提示词的新按钮。
-  - 输入按钮的唯一名称和对应的提示词，该提示词将用于处理剪贴板内容。
+- **Add New Function:**
+  - Click on “Add New Function” to create a new button with a custom prompt.
+  - Enter a unique name for the button and the corresponding prompt that will be used to process the clipboard content.
 
-- **配置设置：**
-  - 点击“Configure Setting”来设置兼容OpenAI接口的 API 密钥、基础 URL 和模型名称。
-  - 这些配置会被本地保存，并且可以从模型下拉菜单中进行选择。
+- **Configure Settings:**
+  - Click on “Configure Setting” to set up the API key, base URL, and model name compatible with the OpenAI interface.
+  - These configurations will be saved locally and can be selected from the model dropdown menu.
 
-- **监控剪贴板：**
-  - 顶部的文本区域显示当前的剪贴板内容，并会每秒自动更新。
-  - 底部的文本区域显示使用所选功能处理后的结果。
+- **Monitor Clipboard:**
+  - The top text area displays the current clipboard content, which automatically updates every second.
+  - The bottom text area displays the result after processing with the selected function.
 
-## 文件说明
+## File Description
 
-- **main.py**：主应用程序代码。
-- **configurations.json**：存储用户定义的配置，例如 API 密钥、基础 URL 和模型名称。
-- **functions.json**：存储用户定义的功能，包括它们的名称和相应的提示词。
+- **main.py**: Main application code.
+- **configurations.json**: Stores user-defined configurations, such as API keys, base URLs, and model names.
+- **functions.json**: Stores user-defined functions, including their names and corresponding prompts.
 
-## 后续开发工作
+## Future Development
 
-- 界面优化，包括模型选择等
-- 历史剪贴板选择
-- 聊天记录存储
+- Interface optimization, including model selection
+- Clipboard history selection
+- Chat history storage
 - ...
 
-## 贡献
+## Contribution
 
-欢迎 fork 仓库，创建分支，并提交 pull request 来贡献你的改进或 bug 修复。
-
-
+You are welcome to fork the repository, create branches, and submit pull requests to contribute your improvements or bug fixes.
+```
