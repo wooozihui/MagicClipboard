@@ -45,6 +45,10 @@
    python main.py
    ```
 
+## 下载
+
+可通过 链接[https://github.com/wooozihui/MagicClipboard/releases/tag/v0.1] 下载windows app
+
 ## 使用说明
 
 - **添加新功能：**
