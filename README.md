@@ -42,7 +42,7 @@
    执行主脚本：
 
    ```bash
-   python clipboard_processor.py
+   python main.py
    ```
 
 ## 使用说明
