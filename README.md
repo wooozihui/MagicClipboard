@@ -63,7 +63,7 @@
 
 ## Download
 
-You can also download the Windows app and run it using the link [https://github.com/wooozihui/MagicClipboard/releases/tag/v0.1].
+You can also download the Windows app and run it using the link[https://github.com/wooozihui/MagicClipboard/releases/tag/v0.2].
 
 ## Instructions
 
