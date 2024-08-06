@@ -2,7 +2,8 @@
 
 **魔法剪贴板** 是一个基于 PyQt5 的windows桌面小程序，它可以自动监控剪贴板内容，并允许用户使用自定义的功能通过 OpenAI 的 API 来处理这些内容。
 
-![6e69db66-438e-47d5-a6c4-3400fa935c99](https://github.com/user-attachments/assets/1ec11d19-eb97-4e7b-902b-fb74e3775e13)
+![036b5ae8-cb72-4ee3-b212-93f58d94b7a6](https://github.com/user-attachments/assets/f043664f-7f6a-42af-a71a-6132ebb45a46)
+
 
 ## 更新
 
