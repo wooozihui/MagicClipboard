@@ -4,11 +4,19 @@ import json
 import os
 from openai import OpenAI
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QTextBrowser, QTextEdit, QLabel, QLineEdit, QDialog, QDialogButtonBox, QGridLayout, QComboBox, QGroupBox, QSizePolicy, QSplitter
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QPixmap, QImage
 from PyQt5.QtCore import Qt, QTimer
+from PIL import ImageGrab, Image
+import io
+import base64
 
 CONFIG_FILE = 'configurations.json'
 FUNCTIONS_FILE = 'functions.json'
+
+def encode_image(image):
+    buffered = io.BytesIO()
+    image.save(buffered, format="PNG")
+    return base64.b64encode(buffered.getvalue()).decode('utf-8')
 
 class ConfigDialog(QDialog):
     def __init__(self, parent=None):
@@ -19,9 +27,7 @@ class ConfigDialog(QDialog):
 
         layout = QVBoxLayout()
 
-        # 输入框布局
         inputLayout = QGridLayout()
-
         self.baseUrlInput = QLineEdit(self)
         self.baseUrlInput.setPlaceholderText("Enter Base URL")
         inputLayout.addWidget(QLabel("Base URL:"), 0, 0)
@@ -39,7 +45,6 @@ class ConfigDialog(QDialog):
 
         layout.addLayout(inputLayout)
 
-        # 按钮布局
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
@@ -59,7 +64,6 @@ class AddFunctionDialog(QDialog):
 
         layout = QVBoxLayout()
 
-        # 输入框布局
         inputLayout = QGridLayout()
         self.promptInput = QLineEdit(self)
         self.promptInput.setPlaceholderText("Enter your custom prompt here")
@@ -73,7 +77,6 @@ class AddFunctionDialog(QDialog):
 
         layout.addLayout(inputLayout)
 
-        # 按钮布局
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
@@ -84,11 +87,52 @@ class AddFunctionDialog(QDialog):
     def getInputs(self):
         return self.promptInput.text(), self.buttonNameInput.text()
 
+class EditFunctionDialog(QDialog):
+    def __init__(self, functions, parent=None):
+        super().__init__(parent)
+
+        self.setWindowTitle("Edit Function")
+        self.setGeometry(200, 200, 400, 300)
+        self.functions = functions
+
+        layout = QVBoxLayout()
+
+        # 选择功能下拉菜单
+        self.functionComboBox = QComboBox(self)
+        self.functionComboBox.addItems([func['button_name'] for func in self.functions])
+        layout.addWidget(QLabel("Select Function:"))
+        layout.addWidget(self.functionComboBox)
+
+        # 编辑prompt输入框
+        self.promptInput = QLineEdit(self)
+        self.promptInput.setPlaceholderText("Modify the prompt here")
+        layout.addWidget(QLabel("New Prompt:"))
+        layout.addWidget(self.promptInput)
+
+        # 编辑按钮名称输入框
+        self.buttonNameInput = QLineEdit(self)
+        self.buttonNameInput.setPlaceholderText("Modify the button name here")
+        layout.addWidget(QLabel("New Button Name:"))
+        layout.addWidget(self.buttonNameInput)
+
+        # 按钮布局
+        self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+        layout.addWidget(self.buttonBox)
+
+        self.setLayout(layout)
+
+    def getModifications(self):
+        selected_function_index = self.functionComboBox.currentIndex()
+        new_prompt = self.promptInput.text()
+        new_button_name = self.buttonNameInput.text()
+        return selected_function_index, new_prompt, new_button_name
+
 class ClipboardApp(QWidget):
     def __init__(self):
         super().__init__()
 
-        # 加载配置和功能
         self.configurations = self.load_configurations()
         self.functions = self.load_functions()
         self.current_config = None
@@ -100,9 +144,8 @@ class ClipboardApp(QWidget):
         self.setWindowTitle('Clipboard Processor')
         self.setGeometry(100, 100, 900, 600)
 
-        mainLayout = QHBoxLayout()
+        mainSplitter = QSplitter(Qt.Horizontal)
 
-        # 左侧功能按钮栏
         leftGroupBox = QGroupBox()
         leftGroupBox.setFont(QFont('Arial', 10))
         self.leftLayout = QVBoxLayout()
@@ -110,58 +153,89 @@ class ClipboardApp(QWidget):
         self.leftLayout.addStretch()
         leftGroupBox.setLayout(self.leftLayout)
         leftGroupBox.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-        mainLayout.addWidget(leftGroupBox)
+        mainSplitter.addWidget(leftGroupBox)
 
-        # 中间文本区域
-        splitter = QSplitter(Qt.Vertical)
+        middleSplitter = QSplitter(Qt.Vertical)
         
         self.clipboardView = QTextEdit()
         self.clipboardView.setFont(QFont('Arial', 12))
         self.clipboardView.setReadOnly(True)
-        splitter.addWidget(self.clipboardView)
-        
+        middleSplitter.addWidget(self.clipboardView)
+
+        self.imageView = QLabel()
+        self.imageView.setAlignment(Qt.AlignCenter)
+        middleSplitter.addWidget(self.imageView)
+
         self.outputView = QTextBrowser()
         self.outputView.setFont(QFont('Arial', 12))
-        splitter.addWidget(self.outputView)
+        middleSplitter.addWidget(self.outputView)
 
-        splitter.setSizes([100, 200])  # 初始分割比例
-        mainLayout.addWidget(splitter)
+        middleSplitter.setSizes([100, 200, 200])
+        mainSplitter.addWidget(middleSplitter)
 
-        # 右侧设置按钮区域
         rightGroupBox = QGroupBox()
         rightGroupBox.setFont(QFont('Arial', 10))
-        self.rightButtonLayout = QVBoxLayout()
+        rightLayout = QVBoxLayout()
 
+        configLayout = QVBoxLayout()
         self.addButton = QPushButton("Add New Function")
         self.addButton.setFont(QFont('Arial', 10))
-        self.rightButtonLayout.addWidget(self.addButton)
+        configLayout.addWidget(self.addButton)
 
         self.modelComboBox = QComboBox()
         self.modelComboBox.addItem("Select Model")
         self.modelComboBox.setFont(QFont('Arial', 10))
         self.modelComboBox.currentIndexChanged.connect(self.set_current_config)
-        self.rightButtonLayout.addWidget(self.modelComboBox)
+        configLayout.addWidget(self.modelComboBox)
 
         self.configButton = QPushButton("Configure Settings")
         self.configButton.setFont(QFont('Arial', 10))
-        self.rightButtonLayout.addWidget(self.configButton)
+        configLayout.addWidget(self.configButton)
 
-        self.rightButtonLayout.addStretch()
-        rightGroupBox.setLayout(self.rightButtonLayout)
+        # 添加修改功能按钮到右上角设置区域
+        self.editFunctionButton = QPushButton("Edit Function")
+        self.editFunctionButton.setFont(QFont('Arial', 10))
+        self.editFunctionButton.clicked.connect(self.open_edit_function_dialog)
+        configLayout.addWidget(self.editFunctionButton)
+
+        configLayout.addStretch()
+        rightLayout.addLayout(configLayout)
+
+        inputLayout = QVBoxLayout()
+        self.customInput = QLineEdit(self)
+        self.customInput.setPlaceholderText("Enter your custom input here")
+        inputLayout.addWidget(self.customInput)
+
+        self.sendButton = QPushButton("Send")
+        self.sendButton.setFont(QFont('Arial', 10))
+        self.sendButton.clicked.connect(self.process_combined_input)
+        inputLayout.addWidget(self.sendButton)
+
+        inputLayout.addStretch()
+        rightLayout.addLayout(inputLayout)
+
+        rightGroupBox.setLayout(rightLayout)
         rightGroupBox.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-        mainLayout.addWidget(rightGroupBox)
+        mainSplitter.addWidget(rightGroupBox)
 
-        self.setLayout(mainLayout)
+        mainSplitter.setSizes([150, 450, 150])
 
-        # Connect signals after UI setup
+        self.setLayout(QVBoxLayout())
+        self.layout().addWidget(mainSplitter)
+
         self.addButton.clicked.connect(self.open_add_function_dialog)
         self.configButton.clicked.connect(self.open_config_dialog)
         self.add_config_options()
 
-        # Timer to refresh clipboard content
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.check_clipboard_content)
-        self.timer.start(1000)  # Check every second
+        self.timer.start(1000)
+
+    def process_combined_input(self):
+        custom_input = self.customInput.text()
+        clipboard_text = self.clipboardView.toPlainText()
+        combined_text = f"{custom_input}\n{clipboard_text}"
+        self.process_clipboard_data(combined_text)
 
     def load_configurations(self):
         if os.path.exists(CONFIG_FILE):
@@ -200,6 +274,8 @@ class ClipboardApp(QWidget):
 
     def process_clipboard_data(self, custom_prompt):
         clipboard_text = self.clipboardView.toPlainText()
+        clipboard_image = ImageGrab.grabclipboard()
+
         if not self.current_config:
             self.outputView.setMarkdown("**No configuration selected**")
             return
@@ -210,16 +286,36 @@ class ClipboardApp(QWidget):
         client = OpenAI(base_url=base_url, api_key=api_key)
         
         try:
-            chat_completion = client.chat.completions.create(
-                messages=[
-                    {
-                        "role": "user",
-                        "content": f"{custom_prompt}\n{clipboard_text}",
-                    }
-                ],
-                model=model_name,
-            )
-            self.outputView.setMarkdown(chat_completion.choices[0].message.content)
+            if isinstance(clipboard_image, Image.Image):
+                base64_image = encode_image(clipboard_image)
+
+                chat_completion = client.chat.completions.create(
+                    messages=[
+                        {
+                            "role": "user",
+                            "content": [{"type": "text", "text":f"{custom_prompt}\n{clipboard_text}"},
+                                        {
+                                            "type": "image_url",
+                                                    "image_url": {
+                                                    "url": f"data:image/png;base64,{base64_image}"
+                                                }
+                                        }],
+                        }
+                    ],
+                    model=model_name,
+                )
+                self.outputView.setMarkdown(chat_completion.choices[0].message.content)
+            else:
+                chat_completion = client.chat.completions.create(
+                    messages=[
+                        {
+                            "role": "user",
+                            "content": f"{custom_prompt}\n{clipboard_text}",
+                        }
+                    ],
+                    model=model_name,
+                )
+                self.outputView.setMarkdown(chat_completion.choices[0].message.content)
         except Exception as e:
             self.outputView.setMarkdown(f"**Error**: {str(e)}")
 
@@ -228,12 +324,24 @@ class ClipboardApp(QWidget):
         if dialog.exec_():
             custom_prompt, button_name = dialog.getInputs()
             if custom_prompt and button_name:
-                # 保存新功能
                 new_function = {'button_name': button_name, 'prompt': custom_prompt}
                 self.functions.append(new_function)
                 self.save_functions()
-                # 添加新按钮
                 self.add_function_button(button_name, custom_prompt)
+
+    def open_edit_function_dialog(self):
+        dialog = EditFunctionDialog(self.functions, self)
+        if dialog.exec_():
+            selected_function_index, new_prompt, new_button_name = dialog.getModifications()
+            if new_prompt or new_button_name:
+                if new_prompt:
+                    self.functions[selected_function_index]['prompt'] = new_prompt
+                if new_button_name:
+                    self.functions[selected_function_index]['button_name'] = new_button_name
+
+                self.save_functions()
+
+                self.leftLayout.itemAt(selected_function_index).widget().setText(new_button_name)
 
     def add_function_button(self, button_name, custom_prompt):
         newButton = QPushButton(button_name)
@@ -256,7 +364,7 @@ class ClipboardApp(QWidget):
                 self.save_configurations()
 
     def set_current_config(self, index):
-        if index > 0:  # 跳过第一个 "Select Model" 选项
+        if index > 0:
             model_name = self.modelComboBox.itemText(index)
             for config in self.configurations:
                 if config['model_name'] == model_name:
@@ -266,9 +374,17 @@ class ClipboardApp(QWidget):
 
     def check_clipboard_content(self):
         clipboard_text = pyperclip.paste()
+        clipboard_image = ImageGrab.grabclipboard()
+
         if clipboard_text != self.previous_clipboard_content:
             self.previous_clipboard_content = clipboard_text
             self.clipboardView.setPlainText(clipboard_text)
+        
+        if isinstance(clipboard_image, Image.Image):
+            clipboard_image_qt = clipboard_image.toqpixmap()
+            self.imageView.setPixmap(clipboard_image_qt.scaled(self.imageView.size(), Qt.KeepAspectRatio))
+        else:
+            self.imageView.clear()
 
 def main():
     app = QApplication(sys.argv)
