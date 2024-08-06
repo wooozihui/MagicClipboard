@@ -4,11 +4,19 @@
         "prompt": "你是一个英译中大师，把下面的文本信达雅的翻译为中文:"
     },
     {
-        "button_name": "写诗",
-        "prompt": "根据下文写一首诗:"
+        "button_name": "为你写诗",
+        "prompt": "写一首关于下面文本的诗词:"
     },
     {
         "button_name": "文本理解",
         "prompt": "请分析下面的文本是什么意思,并用中文回答："
+    },
+    {
+        "button_name": "OCR",
+        "prompt": "提取图片中的文字"
+    },
+    {
+        "button_name": "图像理解",
+        "prompt": "这张图片是什么意思："
     }
 ]
