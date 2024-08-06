@@ -4,6 +4,10 @@
 
 ![6e69db66-438e-47d5-a6c4-3400fa935c99](https://github.com/user-attachments/assets/1ec11d19-eb97-4e7b-902b-fb74e3775e13)
 
+## 更新
+
+- 2024-8-6: 增加功能编辑按钮；增加图像剪贴板与对话功能；界面优化
+
 ## 动机
 
 **1.来自PowerToy keyboard的启发**: 下图为PowerToy keyboard程序，它支持使用GPT对剪贴板文本进行处理，但每次都需要用户在使用的时候手动输入prompt进行格式描述，很不方便；MagicClipboard通过允许用户预定义操作来解决这一问题;
