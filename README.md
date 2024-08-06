@@ -3,8 +3,10 @@
 
 **Magic Clipboard** is a Windows desktop application based on PyQt5 that automatically monitors clipboard content and allows users to process this content using custom functions through OpenAI's API. For the Chinese version of this document, please see [README-cn.md](./README-cn.md).
 
-![6e69db66-438e-47d5-a6c4-3400fa935c99](https://github.com/user-attachments/assets/df629811-6b39-46b7-b9c7-ba7b2d37a72f)
+![036b5ae8-cb72-4ee3-b212-93f58d94b7a6](https://github.com/user-attachments/assets/18bd198d-1db6-442e-a210-df12c9668f0c)
 
+## Update
+- 2024-8-6: Added function edit button; added image clipboard and conversation feature; interface optimization
 
 ## Motivation
 
