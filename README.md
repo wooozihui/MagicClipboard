@@ -8,7 +8,8 @@ For the Chinese version of this document, please see [README-cn.md](./README-cn.
 
 ![036b5ae8-cb72-4ee3-b212-93f58d94b7a6](https://github.com/user-attachments/assets/18bd198d-1db6-442e-a210-df12c9668f0c)
 
-## Update
+## Update 
+- 2024-8-8: 🚀🚀🚀Support stream output now
 - 2024-8-6: Added function edit button; added image clipboard and conversation feature; interface optimization
 
 ## Motivation
