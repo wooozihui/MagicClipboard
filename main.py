@@ -5,10 +5,11 @@ import os
 from openai import OpenAI
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QTextBrowser, QTextEdit, QLabel, QLineEdit, QDialog, QDialogButtonBox, QGridLayout, QComboBox, QGroupBox, QSizePolicy, QSplitter
 from PyQt5.QtGui import QFont, QPixmap, QImage
-from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QObject
 from PIL import ImageGrab, Image
 import io
 import base64
+import threading
 
 CONFIG_FILE = 'configurations.json'
 FUNCTIONS_FILE = 'functions.json'
@@ -128,6 +129,48 @@ class EditFunctionDialog(QDialog):
         new_prompt = self.promptInput.text()
         new_button_name = self.buttonNameInput.text()
         return selected_function_index, new_prompt, new_button_name
+
+class Worker(QObject):
+    update_output = pyqtSignal(str)
+
+    def process_clipboard_data(self, client, model_name, custom_prompt, clipboard_text, clipboard_image):
+        try:
+            if isinstance(clipboard_image, Image.Image):
+                base64_image = encode_image(clipboard_image)
+
+                chat_completion = client.chat.completions.create(
+                    messages=[
+                        {
+                            "role": "user",
+                            "content": [{"type": "text", "text":f"{custom_prompt}\n{clipboard_text}"},
+                                        {
+                                            "type": "image_url",
+                                                    "image_url": {
+                                                    "url": f"data:image/png;base64,{base64_image}"
+                                                }
+                                        }],
+                        }
+                    ],
+                    model=model_name,
+                    stream=True,
+                )
+            else:
+                chat_completion = client.chat.completions.create(
+                    messages=[
+                        {
+                            "role": "user",
+                            "content": f"{custom_prompt}\n{clipboard_text}",
+                        }
+                    ],
+                    model=model_name,
+                    stream=True,
+                )
+
+            for chunk in chat_completion:
+                if chunk.choices[0].delta.content:
+                    self.update_output.emit(chunk.choices[0].delta.content)
+        except Exception as e:
+            self.update_output.emit(f"**Error**: {str(e)}")
 
 class ClipboardApp(QWidget):
     def __init__(self):
@@ -285,39 +328,14 @@ class ClipboardApp(QWidget):
         model_name = self.current_config['model_name']
         client = OpenAI(base_url=base_url, api_key=api_key)
         
-        try:
-            if isinstance(clipboard_image, Image.Image):
-                base64_image = encode_image(clipboard_image)
+        self.outputView.clear()
+        self.worker = Worker()
+        self.worker.update_output.connect(self.update_output_view)
+        thread = threading.Thread(target=self.worker.process_clipboard_data, args=(client, model_name, custom_prompt, clipboard_text, clipboard_image))
+        thread.start()
 
-                chat_completion = client.chat.completions.create(
-                    messages=[
-                        {
-                            "role": "user",
-                            "content": [{"type": "text", "text":f"{custom_prompt}\n{clipboard_text}"},
-                                        {
-                                            "type": "image_url",
-                                                    "image_url": {
-                                                    "url": f"data:image/png;base64,{base64_image}"
-                                                }
-                                        }],
-                        }
-                    ],
-                    model=model_name,
-                )
-                self.outputView.setMarkdown(chat_completion.choices[0].message.content)
-            else:
-                chat_completion = client.chat.completions.create(
-                    messages=[
-                        {
-                            "role": "user",
-                            "content": f"{custom_prompt}\n{clipboard_text}",
-                        }
-                    ],
-                    model=model_name,
-                )
-                self.outputView.setMarkdown(chat_completion.choices[0].message.content)
-        except Exception as e:
-            self.outputView.setMarkdown(f"**Error**: {str(e)}")
+    def update_output_view(self, text):
+        self.outputView.insertPlainText(text)
 
     def open_add_function_dialog(self):
         dialog = AddFunctionDialog(self)
