@@ -67,7 +67,7 @@ For the Chinese version of this document, please see [README-cn.md](./README-cn.
 
 ## Download
 
-You can also download the Windows app and run it using the link[https://github.com/wooozihui/MagicClipboard/releases/tag/v0.2].
+You can also download the Windows app and run it using the link[https://github.com/wooozihui/MagicClipboard/releases/tag/v0.3].
 
 ## Instructions
 
